@@ -1,0 +1,4 @@
+node_modules/
+coverage/
+cicd/test/data/
+src/__generated__/

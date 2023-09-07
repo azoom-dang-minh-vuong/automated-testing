@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+  automated-testing:
+    image: mysql:8
+    ports:
+      - '3399:3306'
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: automated-testing
+      MYSQL_ROOT_PASSWORD: automated-testing
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default_authentication_plugin=mysql_native_password --skip-log-bin
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-uroot', '-pautomated-testing']
+      interval: 10s
+      timeout: 5s
+      retries: 5

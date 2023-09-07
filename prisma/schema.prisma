@@ -1,0 +1,60 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
+}
+
+generator fabbrica {
+  provider = "prisma-fabbrica"
+}
+
+model Customer {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(255)
+  email           String    @unique @db.VarChar(255)
+  createdDatetime DateTime  @default(now()) @map("created_datetime")
+  accounts        Account[]
+
+  @@map("customers")
+}
+
+model Account {
+  id                  Int           @id @default(autoincrement())
+  customerId          Int           @map("customer_id") @db.Int
+  customer            Customer      @relation(fields: [customerId], references: [id])
+  name                String        @default("") @db.VarChar(255)
+  accountNumber       String        @unique @db.VarChar(255)
+  amount              Int           @db.Int
+  minimumAmount       Int?          @db.Int
+  createdDatetime     DateTime      @default(now()) @map("created_datetime")
+  incomeTransactions  Transaction[] @relation("incomeTransactions")
+  outcomeTransactions Transaction[] @relation("outcomeTransactions")
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id                Int      @id @default(autoincrement())
+  amount            Int      @db.Int
+  senderAccountId   Int?     @map("sender_account_id") @db.Int
+  senderAccount     Account? @relation("outcomeTransactions", fields: [senderAccountId], references: [id])
+  receiverAccountId Int?     @map("receiver_account_id") @db.Int
+  receiverAccount   Account? @relation("incomeTransactions", fields: [receiverAccountId], references: [id])
+  message           String   @db.VarChar(255)
+  fee               Int      @db.Int
+  createdDatetime   DateTime @default(now()) @map("created_datetime")
+
+  @@map("transactions")
+}
+
+model TransactionType {
+  id   Int    @id @default(autoincrement())
+  type String @db.VarChar(100)
+  fee  Int    @db.Int
+
+  @@map("transaction_types")
+}
