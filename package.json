@@ -9,7 +9,7 @@
     "prisma:seed": "env $(grep -v '^#' .env) node --experimental-specifier-resolution=node --experimental-json-modules --experimental-loader=./helpers/loader.js --no-warnings ./fixtures/seed.js",
     "dcc": "docker compose -f cicd/test/docker-compose.yml",
     "dev": "env $(grep -v '^#' .env) nodemon index.js --exec 'node --experimental-specifier-resolution=node --experimental-json-modules --experimental-loader=./helpers/loader.js --no-warnings'",
-    "test": "env $(grep -v '^#' .env) jest --coverage --runInBand --no-cache"
+    "test": "env $(grep -v '^#' .env.test) jest --coverage --runInBand --no-cache"
   },
   "dependencies": {
     "@prisma/client": "^5.2.0",
