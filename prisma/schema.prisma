@@ -15,8 +15,9 @@ generator fabbrica {
 
 model Customer {
   id              Int       @id @default(autoincrement())
-  name            String    @db.VarChar(255)
-  email           String    @unique @db.VarChar(255)
+  name            String    @db.VarChar(100)
+  email           String    @unique @db.VarChar(100)
+  tel             String    @unique @db.VarChar(20)
   createdDatetime DateTime  @default(now()) @map("created_datetime")
   accounts        Account[]
 
