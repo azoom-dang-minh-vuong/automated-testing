@@ -27,6 +27,7 @@ export const customerFactory = defineCustomerFactory({
     email: `${faker.string.alphanumeric({
       length: { min: 3, max: 15 },
     })}@${faker.internet.domainName()}`,
+    tel: faker.phone.number('0#########'),
   }),
 })
 
