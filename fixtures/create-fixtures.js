@@ -8,7 +8,7 @@ import {
   defineCustomerFactory,
   defineTransactionFactory,
   defineTransactionTypeFactory,
-} from '@root/node_modules/.prisma/fabbrica'
+} from '@prisma/fabbrica'
 
 initialize({ prisma })
 registerScalarFieldValueGenerator({
