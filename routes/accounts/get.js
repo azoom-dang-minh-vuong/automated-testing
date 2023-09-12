@@ -1,5 +1,6 @@
 import { prisma } from '@root/database'
 
+export { default as middleware } from '@middleware/ensure-authenticated'
 /**
  * @type {import('express').RequestHandler}
  */

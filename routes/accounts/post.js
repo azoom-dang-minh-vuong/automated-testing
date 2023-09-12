@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '@root/database'
 import { sendSMS } from '@services/sms'
 
+export { default as middleware } from '@middleware/ensure-authenticated'
 /**
  * @type {import('express').RequestHandler}
  */
