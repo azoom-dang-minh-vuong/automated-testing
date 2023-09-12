@@ -14,6 +14,7 @@ export default async (req, res) => {
   }
   const transactionType = detectTransactionType({ senderAccountNumber, receiverAccountNumber })
   try {
+    const messagesToCustomer = []
     await prisma.$transaction(async transaction => {
       const [{ fee }, senderAccount, receiverAccount] = await Promise.all([
         transaction.transactionType.findFirst({
@@ -22,6 +23,7 @@ export default async (req, res) => {
         senderAccountNumber && getAccountByAccountNumber(transaction, senderAccountNumber, userId),
         receiverAccountNumber && getAccountByAccountNumber(transaction, receiverAccountNumber),
       ])
+      const promises = []
       if (transactionType === TRANSACTION_TYPES.WITHDRAWAL) {
         if (!senderAccount) {
           throw new Error('Account not found')
@@ -30,7 +32,7 @@ export default async (req, res) => {
           throw new Error('Not enough money')
         }
         const currentAmount = senderAccount.amount - amount - fee
-        await updateAmount(transaction, senderAccountNumber, currentAmount)
+        promises.push(updateAmount(transaction, senderAccountNumber, currentAmount))
         const content = buildMessage({
           amount,
           message,
@@ -38,7 +40,7 @@ export default async (req, res) => {
           currentAmount,
           isAddAmount: false,
         })
-        sendSMS(tel, content).catch(console.error)
+        messagesToCustomer.push({ tel, content })
       } else if (transactionType === TRANSACTION_TYPES.TRANSFER) {
         if (!senderAccount || !receiverAccount) {
           throw new Error('Account not found')
@@ -48,10 +50,10 @@ export default async (req, res) => {
         }
         const currentAmountSender = senderAccount.amount - amount - fee
         const currentAmountReceiver = receiverAccount.amount + amount
-        await Promise.all([
+        promises.push(
           updateAmount(transaction, senderAccountNumber, currentAmountSender),
-          updateAmount(transaction, receiverAccountNumber, currentAmountReceiver),
-        ])
+          updateAmount(transaction, receiverAccountNumber, currentAmountReceiver)
+        )
         const contentSender = buildMessage({
           amount,
           message,
@@ -66,14 +68,16 @@ export default async (req, res) => {
           currentAmount: currentAmountReceiver,
           isAddAmount: true,
         })
-        sendSMS(tel, contentSender).catch(console.error)
-        sendSMS(receiverAccount.customer.tel, contentReceiver).catch(console.error)
+        messagesToCustomer.push(
+          { tel, content: contentSender },
+          { tel: receiverAccount.customer.tel, content: contentReceiver }
+        )
       } else {
         if (!receiverAccount || receiverAccount.customerId !== userId) {
           throw new Error('Account not found')
         }
         const currentAmount = receiverAccount.amount + amount - fee
-        await updateAmount(transaction, receiverAccountNumber, currentAmount)
+        promises.push(updateAmount(transaction, receiverAccountNumber, currentAmount))
         const content = buildMessage({
           amount,
           message,
@@ -81,7 +85,7 @@ export default async (req, res) => {
           currentAmount,
           isAddAmount: true,
         })
-        sendSMS(tel, content).catch(console.error)
+        messagesToCustomer.push({ tel, content })
       }
 
       const data = {
@@ -91,8 +95,10 @@ export default async (req, res) => {
         fee,
         message,
       }
-      return transaction.transaction.create({ data })
+      promises.push(transaction.transaction.create({ data }))
+      return Promise.all(promises)
     })
+    await Promise.allSettled(messagesToCustomer.map(({ tel, content }) => sendSMS(tel, content)))
     return res.sendStatus(201)
   } catch (err) {
     console.error(err)
