@@ -108,6 +108,7 @@ const validateRequestBody = ({ senderAccountNumber, receiverAccountNumber, amoun
   return (
     typeof amount === 'number' &&
     amount > 0 &&
+    Number.isInteger(amount) &&
     validateAccountNumber(senderAccountNumber) &&
     validateAccountNumber(receiverAccountNumber) &&
     (senderAccountNumber || receiverAccountNumber) &&
