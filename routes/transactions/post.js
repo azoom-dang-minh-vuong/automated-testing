@@ -101,7 +101,6 @@ export default async (req, res) => {
     await Promise.allSettled(messagesToCustomer.map(({ tel, content }) => sendSMS(tel, content)))
     return res.sendStatus(201)
   } catch (err) {
-    console.error(err)
     return res.sendStatus(400)
   }
 }
@@ -129,8 +128,11 @@ const detectTransactionType = ({ senderAccountNumber, receiverAccountNumber }) =
   return senderAccountNumber ? TRANSACTION_TYPES.WITHDRAWAL : TRANSACTION_TYPES.DEPOSIT
 }
 
-const getAccountByAccountNumber = async (transaction, accountNumber, customerId) => {
-  return await transaction.account.findFirst({
+/**
+ * @param {import('@prisma/client').Prisma.TransactionClient} transaction
+ */
+const getAccountByAccountNumber = (transaction, accountNumber, customerId) => {
+  return transaction.account.findFirst({
     where: { accountNumber, ...(customerId ? { customerId } : {}) },
     include: {
       customer: {
@@ -140,6 +142,9 @@ const getAccountByAccountNumber = async (transaction, accountNumber, customerId)
   })
 }
 
+/**
+ * @param {import('@prisma/client').Prisma.TransactionClient} transaction
+ */
 const updateAmount = async (transaction, accountNumber, amount) => {
   return transaction.account.update({
     where: { accountNumber },
