@@ -67,7 +67,7 @@ export default async (req, res) => {
           isAddAmount: true,
         })
         sendSMS(tel, contentSender).catch(console.error)
-        sendSMS(tel, contentReceiver).catch(console.error)
+        sendSMS(receiverAccount.customer.tel, contentReceiver).catch(console.error)
       } else {
         if (!receiverAccount || receiverAccount.customerId !== userId) {
           throw new Error('Account not found')
