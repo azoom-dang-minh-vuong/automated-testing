@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 
 export const generate = userId => {
   return jwt.sign({}, process.env.JWT_SECRET, { subject: String(userId), expiresIn: '1d' })
@@ -16,3 +16,5 @@ export const verify = token => {
     })
   })
 }
+
+console.log(generate(5))
