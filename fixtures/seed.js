@@ -1,16 +1,13 @@
 import { prisma } from '@root/database'
 import { TRANSACTION_TYPES } from '@root/constants'
-import { accountFactory, customerFactory, transactionTypeFactory } from './create-fixtures'
+import { accountFactory, transactionTypeFactory } from './create-fixtures'
 import { deleteFixtures } from './delete-fixtures'
 
 async function seed() {
   await deleteFixtures()
   const transactionTypes = Object.values(TRANSACTION_TYPES)
   await transactionTypeFactory.createList(transactionTypes.map(type => ({ type })))
-  const customer = await customerFactory.create()
-  const account = await accountFactory.create({
-    customer: { connect: { id: customer.id } },
-  })
+  await accountFactory.createList(2)
 }
 
 seed()

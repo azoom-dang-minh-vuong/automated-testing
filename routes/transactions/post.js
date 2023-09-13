@@ -28,7 +28,7 @@ export default async (req, res) => {
         if (!senderAccount) {
           throw new Error('Account not found')
         }
-        if (senderAccount.amount - senderAccount.minimumAmount < amount + fee) {
+        if (senderAccount.amount < amount + fee) {
           throw new Error('Not enough money')
         }
         const currentAmount = senderAccount.amount - amount - fee
@@ -45,7 +45,7 @@ export default async (req, res) => {
         if (!senderAccount || !receiverAccount) {
           throw new Error('Account not found')
         }
-        if (senderAccount.amount - senderAccount.minimumAmount < amount + fee) {
+        if (senderAccount.amount < amount + fee) {
           throw new Error('Not enough money')
         }
         const currentAmountSender = senderAccount.amount - amount - fee
@@ -107,12 +107,11 @@ export default async (req, res) => {
 
 const validateRequestBody = ({ senderAccountNumber, receiverAccountNumber, amount }) => {
   const validateAccountNumber = accountNumber => {
-    return accountNumber ? parseInt(accountNumber) : true
+    return accountNumber ? /^\d+$/.test(accountNumber) : true
   }
 
   return (
     typeof amount === 'number' &&
-    amount > 0 &&
     Number.isInteger(amount) &&
     validateAccountNumber(senderAccountNumber) &&
     validateAccountNumber(receiverAccountNumber) &&

@@ -18,11 +18,7 @@ export default async (req, res) => {
       skip: skip ? skip : undefined,
       take: +limit ? +limit : undefined,
     }),
-    prisma.account.count({
-      where: {
-        customerId: req.user.id,
-      },
-    }),
+    prisma.account.count(),
   ])
   res.setHeader('X-Total-Count', total).send(data)
 }
